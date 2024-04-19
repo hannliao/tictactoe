@@ -20,7 +20,6 @@ function Gameboard () {
 
     const printBoard = () => {
         const printedBoard = board.map((row) => row.map((cell) => cell.getValue()));
-        console.log(printedBoard);
     };
     
     return { getBoard, markSpot, printBoard };
@@ -38,7 +37,7 @@ function Cell() {
     return { addMark, getValue };
 }
 
-function GameController(playerX = "Player X", playerO = "Player O") {
+function GameController(playerX = "X", playerO = "O") {
     const board = Gameboard();
 
     const players = [
@@ -49,10 +48,13 @@ function GameController(playerX = "Player X", playerO = "Player O") {
     ];
 
     let activePlayer = players[0];
+    let turns = 0;
 
     const switchTurn = () => {
         activePlayer = activePlayer === players[0] ? players[1] : players[0];
+        turns++;
     }
+
     const getActivePlayer = () => activePlayer;
 
     const printRound = () => {
@@ -65,27 +67,74 @@ function GameController(playerX = "Player X", playerO = "Player O") {
             switchTurn();
         }
 
-        // check for a winner
+        checkWin();
         printRound();
     };
 
+    const checkWin = () => {
+        const b = board.getBoard();
+        // check for all 8 win scenarios
+        for (let i = 0; i < 3; i++) {
+            if (b[i][0].getValue() !== "" 
+            && b[i][0].getValue() === b[i][1].getValue() 
+            && b[i][0].getValue() === b[i][2].getValue()) {
+                return `${b[i][0].getValue()} wins!`;
+            }
+        }
+        for (let j = 0; j < 3; j++) {
+            if (b[0][j].getValue() !== "" 
+            && b[0][j].getValue() === b[1][j].getValue() 
+            && b[0][j].getValue() === b[2][j].getValue()) {
+                return `${b[0][j].getValue()} wins!`;
+            }
+        }
+        if (b[0][0].getValue() !== "" 
+        && b[0][0].getValue() === b[1][1].getValue() 
+        && b[0][0].getValue() === b[2][2].getValue()) {
+            return `${b[0][0].getValue()} wins!`;
+        }
+        if (b[0][2].getValue() !== "" 
+        && b[0][2].getValue() === b[1][1].getValue() 
+        && b[0][2].getValue() === b[2][0].getValue()) {
+            return `${b[0][2].getValue()} wins!`;
+        }
+
+        // check for tie
+        if (turns === 9) {
+            return "It's a tie!";
+        }
+        return false;
+    };
+
+    const reset = () => {
+        board.getBoard().forEach((row) => {
+            row.forEach((cell) => {
+                cell.addMark("");
+            })
+        })
+        activePlayer = players[0];
+        turns = 0;
+        printRound();
+    }
+
     printRound();
 
-    return { playRound, getActivePlayer, getBoard: board.getBoard };
+    return { playRound, getActivePlayer, getBoard: board.getBoard, checkWin, reset};
 }
 
 function ScreenController() {
-    const game = GameController();
-    const playerTurn = document.querySelector(".turn");
+    let game = GameController();
+    const winnerDiv = document.querySelector(".winner");
     const boardDiv = document.querySelector(".board");
+    const restartButton = document.querySelector(".restart");
 
     const updateScreen = () => {
         boardDiv.textContent = "";
+        winnerDiv.textContent = "";
+        restartButton.textContent = "restart";
 
         const board = game.getBoard();
         const activePlayer = game.getActivePlayer();
-
-        playerTurn.textContent = `${activePlayer.name}'s turn...`;
 
         board.forEach((row, rowIndex) => {
             row.forEach((cell, colIndex) => {
@@ -97,6 +146,11 @@ function ScreenController() {
                 boardDiv.appendChild(cellButton);
             })
         })
+
+        if (game.checkWin() !== false) {
+            winnerDiv.textContent = `${game.checkWin()}`;
+            boardDiv.removeEventListener("click", clickHandlerBoard);
+        }
     }
 
     function clickHandlerBoard(e) {
@@ -106,6 +160,14 @@ function ScreenController() {
         game.playRound(row, col);
         updateScreen();
     }
+
+    const newGame = () => {
+        game.reset();
+        updateScreen();
+        boardDiv.addEventListener("click", clickHandlerBoard);
+    }
+
+    restartButton.addEventListener("click", newGame);
     boardDiv.addEventListener("click", clickHandlerBoard);
     updateScreen();
 }

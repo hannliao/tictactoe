@@ -1,5 +1,68 @@
+:root {
+    --darkblue: rgb(83, 133, 169);
+    --lightblue: rgb(170, 200, 221);
+    --lightgray: #ededed;
+    --hovergray: #e3e3e3;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Times New Roman", serif;
+    color: var(--darkblue);
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--lightgray);
+}
+
+.container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--lightblue);
+    padding: 200px;
+}
+
+.winner {
+    min-height: 1em;
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 50px;
+}
+
 .board {
     display: grid;
     grid-template-rows: repeat(3, 100px);
     grid-template-columns: repeat(3, 100px);
+    gap: 10px;
+    margin: 50px;
+}
+
+.cell {
+    background-color: var(--lightgray);
+    font-size: 40px;
+    border: none;
+}
+
+.restart {
+    padding: 12px 60px;
+    border: 3px solid var(--darkblue);
+    border-radius: 25px;
+    background-color: var(--lightgray);
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.cell:hover,
+.restart:hover {
+    background-color: var(--hovergray);
 }
